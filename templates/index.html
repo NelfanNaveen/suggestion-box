@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <h1>Your Voice for a Better City</h1>
+    <p>Share suggestions and feedback with your local governing body on roads, water supply, sanitation, streetlights and more.</p>
+    <a href="/submit" class="btn btn-accent">📝 Submit a Suggestion</a>
+</section>
+<div class="stats">
+    <div class="card stat">
+        <div class="stat-num">{{ stats.total }}</div>
+        <div class="stat-label">Total Suggestions</div>
+    </div>
+    <div class="card stat orange">
+        <div class="stat-num">{{ stats.progress }}</div>
+        <div class="stat-label">Under Review / In Progress</div>
+    </div>
+    <div class="card stat green">
+        <div class="stat-num">{{ stats.resolved }}</div>
+        <div class="stat-label">Resolved</div>
+    </div>
+</div>
+<div class="section-title">
+    <h2>How It Works</h2>
+    <p>Three simple steps from idea to action</p>
+</div>
+
+<div class="grid-3">
+    <div class="card step-card">
+        <div class="step-icon">📝</div>
+        <h3>1. Submit</h3>
+        <p>Describe your issue or idea, choose your ward and category, and attach a photo.</p>
+    </div>
+    <div class="card step-card">
+        <div class="step-icon">🔎</div>
+        <h3>2. Track</h3>
+        <p>Get a unique tracking ID and check the status of your suggestion anytime.</p>
+    </div>
+    <div class="card step-card">
+        <div class="step-icon">✅</div>
+        <h3>3. Resolved</h3>
+        <p>Municipal officials review, take action and reply to your suggestion.</p>
+    </div>
+</div>
+{% endblock %}

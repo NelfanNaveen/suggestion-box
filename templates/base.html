@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Digital Suggestion Box{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="tricolor"></div>
+<div class="topbar">
+    <div class="container">
+        <span>Municipal Corporation — Citizen Services Portal</span>
+        <span>Helpline: 1800-000-0000</span>
+    </div>
+</div>
+
+<header class="header">
+    <div class="container">
+        <a href="/" class="brand">
+            <div class="brand-logo">🏛️</div>
+            <div>
+                <div class="brand-title">Digital Suggestion Box</div>
+                <div class="brand-sub">Your voice for better local governance</div>
+            </div>
+        </a>
+        <nav class="nav">
+             <a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a>
+            <a href="/submit" class="{% if request.path == '/submit' %}active{% endif %}">Submit Suggestion</a>
+            <a href="/track" class="{% if request.path == '/track' %}active{% endif %}">Track Status</a>
+            <a href="/suggestions" class="{% if request.path == '/suggestions' %}active{% endif %}">Public Suggestions</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<footer class="footer">
+    © 2026 Digital Suggestion Box for Local Governance · Academic Prototype
+</footer>
+
+</body>
+</html>

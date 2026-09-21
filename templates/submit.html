@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-lg-7">
+<div class="card shadow-sm">
+<div class="card-body p-4">
+    <h3 class="mb-4">Submit a Suggestion</h3>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Your Name (optional)</label>
+                <input type="text" name="name" class="form-control">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Phone (optional)</label>
+                <input type="text" name="phone" class="form-control" maxlength="10">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Ward *</label>
+                <select name="ward" class="form-select" required>
+                    <option value="">-- Select Ward --</option>
+                    {% for w in wards %}<option>{{ w }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Category *</label>
+                <select name="category" class="form-select" required>
+                    <option value="">-- Select Category --</option>
+                    {% for c in categories %}<option>{{ c }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Title *</label>
+            <input type="text" name="title" class="form-control" required maxlength="100"
+                   placeholder="e.g. Streetlight not working near bus stop">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description *</label>
+            <textarea name="description" class="form-control" rows="4" required></textarea>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Photo (optional)</label>
+            <input type="file" name="photo" class="form-control" accept="image/*">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Submit Suggestion</button>
+    </form>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

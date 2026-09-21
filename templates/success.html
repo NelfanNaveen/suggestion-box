@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Submitted Successfully{% endblock %}
+
+{% block content %}
+<div class="success-box">
+<div class="card">
+    <div class="success-icon">✓</div>
+    <h2>Thank You!</h2>
+    <p style="color: var(--muted);">Your suggestion has been submitted to the municipal office.</p>
+
+    <div class="tracking-box">
+        <small>Your Tracking ID</small>
+        <div class="tracking-id">{{ tracking_id }}</div>
+        <small>Save this ID to check the status later</small>
+    </div>
+
+    <div class="btn-row">
+        <a href="/" class="btn btn-outline">Back to Home</a>
+        <a href="/submit" class="btn btn-primary">Submit Another</a>
+    </div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Track Status{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+
+<div class="card">
+    <div class="form-header">
+        <h2>Track Your Suggestion</h2>
+        <p>Enter the tracking ID you received after submitting (e.g. SUG-2026-0001)</p>
+    </div>
+    <form method="GET" class="search-box">
+        <input type="text" name="id" class="form-control" placeholder="SUG-2026-0001" value="{{ tid }}" required>
+        <button type="submit" class="btn btn-primary">Track</button>
+    </form>
+
+    {% if not_found %}
+    <div class="alert alert-error">No suggestion found with ID <strong>{{ tid }}</strong>. Please check and try again.</div>
+    {% endif %}
+</div>
+
+{% if s %}
+<div class="card" style="margin-top: 20px;">
+    <div class="detail-head">
+        <div>
+            <small style="color: var(--muted);">{{ s.tracking_id }}</small>
+            <h3>{{ s.title }}</h3>
+        </div>
+        <span class="badge badge-{{ s.status|lower|replace(' ', '-') }}">{{ s.status }}</span>
+    </div>
+
+    <div class="meta">
+        <span class="tag">📍 {{ s.ward }}</span>
+        <span class="tag">🏷️ {{ s.category }}</span>
+        <span class="tag">🗓️ {{ s.created_at[:10] }}</span>
+        <span class="tag">👍 {{ s.upvotes }} upvotes</span>
+    </div>
+
+    {% if s.status == 'Rejected' %}
+        <div class="alert alert-error">This suggestion was not accepted by the municipal office.</div>
+    {% else %}
+        {% set current = status_flow.index(s.status) if s.status in status_flow else 0 %}
+        <div class="timeline">
+            {% for st in status_flow %}
+            <div class="t-step {% if loop.index0 < current or s.status == 'Resolved' %}done{% elif loop.index0 == current %}current{% endif %}">
+                <div class="t-dot">{% if loop.index0 < current or s.status == 'Resolved' %}✓{% else %}{{ loop.index }}{% endif %}</div>
+                <div class="t-label">{{ st }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <p style="margin-top: 16px;">{{ s.description }}</p>
+
+    {% if s.photo_path %}
+    <img src="{{ url_for('static', filename=s.photo_path) }}" class="detail-photo" alt="Photo">
+    {% endif %}
+
+    {% if s.admin_remark %}
+    <div class="remark"><strong>Reply from Municipal Office:</strong><br>{{ s.admin_remark }}</div>
+    {% endif %}
+</div>
+{% endif %}
+
+</div>
+{% endblock %}
