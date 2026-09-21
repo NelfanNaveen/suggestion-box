@@ -1,10 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.utils import secure_filename
 import sqlite3
 import os
 import uuid
-from datetime import datetime
-
+from datetime import datetime, timedelta, timezone
 app = Flask(__name__)
 app.secret_key = "change-this-key"
 DB = "database.db"
@@ -154,7 +153,50 @@ def upvote(sid):
         session["voted"] = voted
     return redirect(request.referrer or url_for("suggestions"))
 
+# ---------------- REST API (used by desktop Command Center) ----------------
 
+@app.route("/api/stats")
+def api_stats():
+    conn = get_db()
+
+    def group(col):
+        return {r[0]: r[1] for r in conn.execute(f"SELECT {col}, COUNT(*) FROM suggestions GROUP BY {col}")}
+
+    total = conn.execute("SELECT COUNT(*) FROM suggestions").fetchone()[0]
+    upvotes = conn.execute("SELECT COALESCE(SUM(upvotes), 0) FROM suggestions").fetchone()[0]
+    by_status, by_category, by_ward = group("status"), group("category"), group("ward")
+    daily = {r[0]: r[1] for r in conn.execute(
+        "SELECT date(created_at), COUNT(*) FROM suggestions "
+        "WHERE date(created_at) >= date('now', '-6 day') GROUP BY date(created_at)")}
+    conn.close()
+
+    today = datetime.now(timezone.utc).date()
+    trend = []
+    for i in range(6, -1, -1):
+        d = (today - timedelta(days=i)).isoformat()
+        trend.append({"date": d, "count": daily.get(d, 0)})
+
+    resolved = by_status.get("Resolved", 0)
+    return jsonify(
+        total=total,
+        upvotes=upvotes,
+        resolution_rate=round(resolved / total * 100, 1) if total else 0,
+        by_status=by_status,
+        by_category=by_category,
+        by_ward=by_ward,
+        trend=trend,
+    )
+
+
+@app.route("/api/suggestions")
+def api_suggestions():
+    limit = min(request.args.get("limit", 50, type=int), 200)
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT tracking_id, title, category, ward, status, upvotes, created_at "
+        "FROM suggestions ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
 def seed_demo_data():
     conn = get_db()
     if conn.execute("SELECT COUNT(*) FROM suggestions").fetchone()[0] == 0:
@@ -171,11 +213,12 @@ def seed_demo_data():
             ("Anonymous", "Ward 5", "Parks", "Add benches and lights in children's park",
              "The park has no benches for elders and no lighting after 6 PM. Please add both.", "Received", 12),
         ]
+        days_ago = [6, 5, 3, 2, 1]
         for i, (name, ward, cat, title, desc, status, up) in enumerate(samples, start=1):
             conn.execute(
-                """INSERT INTO suggestions (tracking_id, name, ward, category, title, description, status, upvotes)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (f"SUG-{year}-{i:04d}", name, ward, cat, title, desc, status, up),
+                """INSERT INTO suggestions (tracking_id, name, ward, category, title, description, status, upvotes, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now', ?))""",
+                (f"SUG-{year}-{i:04d}", name, ward, cat, title, desc, status, up, f"-{days_ago[i - 1]} days"),
             )
         conn.execute("UPDATE suggestions SET admin_remark = ? WHERE status = 'Resolved'",
                      ("Pothole filled and road resurfaced by the Engineering Department.",))
